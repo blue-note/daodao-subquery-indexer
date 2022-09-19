@@ -1,0 +1,43 @@
+specVersion: 1.0.0
+name: juno-subql-starter
+version: 0.0.1
+runner:
+  node:
+    name: "@subql/node-cosmos"
+    version: ">=0.1.0"
+  query:
+    name: "@subql/query"
+    version: "*"
+description: >-
+  This project can be use as a starting point for developing your Cosmos (Juno) based SubQuery project
+repository: https://github.com/subquery/juno-subql-starter
+schema:
+  file: ./schema.graphql
+
+network:
+  chainId: juno-1
+  # This endpoint must be a public non-pruned archive node
+  # Public nodes may be rate limited, which can affect indexing speed
+  # When developing your project we suggest getting a private API key
+  # You can get them from OnFinality for free https://app.onfinality.io
+  # https://documentation.onfinality.io/support/the-enhanced-api-service
+  endpoint: https://juno.api.onfinality.io/public
+  # Optionally provide the HTTP endpoint of a full chain dictionary to speed up processing
+  dictionary: https://api.subquery.network/sq/subquery/cosmos-juno-dictionary
+
+dataSources:
+  - kind: cosmos/Runtime
+    startBlock: 4136532 # The block when the first proposal in this fund was created
+    mapping:
+      file: "./dist/index.js"
+      handlers:
+        - handler: handleDAOVotes
+          kind: cosmos/MessageHandler
+          filter:
+            type: "/cosmwasm.wasm.v1.MsgExecuteContract"
+            # Filter to only messages with the provide_liquidity function call
+            # Include messages that were in a failed transaction (false by default)
+            includeFailedTx: true
+            contractCall: "vote"
+            values: # A set of key/value pairs that are present in the message data
+              contract: "juno1hk37s260qdcxtv0qz3fzgr9cft7z2vt8shk2p96jxp3fxv0zvj6s47muex"
